@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Garmin Training Importer",
+  "version": "1.0",
+  "description": "Imports training data to Garmin Connect.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://connect.garmin.com/"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://connect.garmin.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

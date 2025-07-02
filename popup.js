@@ -45,49 +45,77 @@ const baseTrainingData = {
 document.addEventListener("DOMContentLoaded", () => {
   const importTrainingButton = document.getElementById("import-training");
   const trainingTextArea = document.getElementById("training-text");
+  const loader = document.getElementById("loader");
+  const status = document.getElementById("status");
 
   importTrainingButton.addEventListener("click", () => {
+    loader.style.display = "block";
+    status.textContent = "";
+
     const trainingText = trainingTextArea.value;
-    const trainingData = parseTrainingText(trainingText);
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tab = tabs[0];
-      const match = tab.url.match(/workout\/(\d+)/);
-      const trainingId = match ? match[1] : null;
+    try {
+      const trainingData = parseTrainingText(trainingText);
 
-      if (trainingId) {
-        chrome.tabs.sendMessage(tab.id, { action: "getToken" }, (response) => {
-          if (response && response.token) {
-            chrome.runtime.sendMessage(
-              {
-                action: "editTraining",
-                data: {
-                  token: response.token,
-                  trainingId: trainingId,
-                  trainingData: {
-                    ...baseTrainingData,
-                    workoutId: Number(trainingId),
-                    ...trainingData,
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const tab = tabs[0];
+        const match = tab.url.match(/workout\/(\d+)/);
+        const trainingId = match ? match[1] : null;
+
+        if (trainingId) {
+          chrome.tabs.sendMessage(
+            tab.id,
+            { action: "getToken" },
+            (response) => {
+              if (response && response.token) {
+                chrome.runtime.sendMessage(
+                  {
+                    action: "editTraining",
+                    data: {
+                      token: response.token,
+                      trainingId: trainingId,
+                      trainingData: {
+                        ...baseTrainingData,
+                        workoutId: Number(trainingId),
+                        ...trainingData,
+                      },
+                    },
                   },
-                },
-              },
-              (response) => {
-                if (response.success) {
-                  console.log("Training edited successfully:", response.data);
-                } else {
-                  console.error("Error editing training:", response.error);
-                }
+                  (response) => {
+                    loader.style.display = "none";
+                    if (response.success) {
+                      status.textContent = "Training imported successfully!";
+                      console.log(
+                        "Training edited successfully:",
+                        response.data
+                      );
+                    } else {
+                      status.textContent = "Error importing training.";
+                      console.error("Error editing training:", response.error);
+                    }
+                  }
+                );
+              } else {
+                loader.style.display = "none";
+                status.textContent = "Could not get token from Garmin Connect.";
+                console.error("Could not get token from Garmin Connect.");
               }
-            );
-          } else {
-            console.error("Could not get token from Garmin Connect.");
-          }
-        });
-      } else {
-        console.error(
-          "Could not extract training ID from the URL. Are you on a workout page?"
-        );
-      }
-    });
+            }
+          );
+        } else {
+          loader.style.display = "none";
+          status.textContent =
+            "Could not extract training ID from the URL. Are you on a workout page?";
+          console.error(
+            "Could not extract training ID from the URL. Are you on a workout page?"
+          );
+        }
+      });
+    } catch (error) {
+      loader.style.display = "none";
+      status.textContent =
+        "Something went wrong while parsing the training data.";
+      console.log("error", error);
+    }
   });
 });

@@ -12,7 +12,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       body: JSON.stringify(trainingData),
       method: "PUT",
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status === 204) {
+          return null;
+        }
+        return response.json();
+      })
       .then((data) => {
         sendResponse({ success: true, data });
       })

@@ -1,0 +1,12 @@
+{
+  "name": "garmin-training-importer",
+  "version": "1.0.0",
+  "description": "Imports training data to Garmin Connect.",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.243",
+    "typescript": "^5.1.6"
+  }
+}

@@ -13,12 +13,12 @@
     "https://connect.garmin.com/"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "dist/background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://connect.garmin.com/*"],
-      "js": ["content.js"]
+      "js": ["dist/content.js"]
     }
   ],
   "action": {

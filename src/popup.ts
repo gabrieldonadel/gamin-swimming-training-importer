@@ -42,11 +42,17 @@ const baseTrainingData = {
   isWheelchair: false,
 };
 
+declare function parseTrainingText(text: string): any;
+
 document.addEventListener("DOMContentLoaded", () => {
-  const importTrainingButton = document.getElementById("import-training");
-  const trainingTextArea = document.getElementById("training-text");
-  const loader = document.getElementById("loader");
-  const status = document.getElementById("status");
+  const importTrainingButton = document.getElementById(
+    "import-training"
+  ) as HTMLButtonElement;
+  const trainingTextArea = document.getElementById(
+    "training-text"
+  ) as HTMLTextAreaElement;
+  const loader = document.getElementById("loader") as HTMLDivElement;
+  const status = document.getElementById("status") as HTMLDivElement;
 
   importTrainingButton.addEventListener("click", () => {
     loader.style.display = "block";
@@ -59,14 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const tab = tabs[0];
-        const match = tab.url.match(/workout\/(\d+)/);
+        const match = tab.url?.match(/workout\/(\d+)/);
         const trainingId = match ? match[1] : null;
 
         if (trainingId) {
           chrome.tabs.sendMessage(
-            tab.id,
+            tab.id as number,
             { action: "getToken" },
-            (response) => {
+            (response: { token: string | null }) => {
               if (response && response.token) {
                 chrome.runtime.sendMessage(
                   {
@@ -81,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       },
                     },
                   },
-                  (response) => {
+                  (response: { success: boolean; data?: any; error?: any }) => {
                     loader.style.display = "none";
                     if (response.success) {
                       status.textContent = "Training imported successfully!";

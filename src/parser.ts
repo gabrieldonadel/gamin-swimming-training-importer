@@ -25,16 +25,39 @@ const freeStrokeType = {
   displayOrder: 6,
 };
 
-function parseTrainingText(text) {
+interface WorkoutStep {
+  type: string;
+  stepOrder: number;
+  description?: string;
+  stepType?: { [key: string]: any };
+  endCondition: { [key: string]: any };
+  endConditionValue?: number;
+  strokeType?: { [key: string]: any };
+  numberOfIterations?: number;
+  workoutSteps?: WorkoutStep[];
+}
+
+interface WorkoutSegment {
+  segmentOrder: number;
+  sportType: { [key: string]: any };
+  workoutSteps: WorkoutStep[];
+}
+
+interface TrainingData {
+  sportType: { [key: string]: any };
+  workoutSegments: WorkoutSegment[];
+}
+
+function parseTrainingText(text: string): TrainingData {
   const lines = text.split("\n").filter((line) => line.trim() !== "");
-  const workoutSteps = [];
+  const workoutSteps: WorkoutStep[] = [];
   let stepOrder = 1;
 
   for (const line of lines) {
     let repetitions = 1;
-    let distance; //number;
-    let description; //string;
-    let rest = 0; //number;
+    let distance: number;
+    let description: string;
+    let rest = 0;
 
     // if includes X it's a repeat
     // inclui o x sem espaço e o m
@@ -49,6 +72,9 @@ function parseTrainingText(text) {
       if (singleMatch) {
         distance = parseInt(singleMatch[1], 10);
         description = singleMatch[2];
+      } else {
+        description = "";
+        distance = 0;
       }
     }
 
@@ -59,7 +85,7 @@ function parseTrainingText(text) {
       description = description.replace(restMatch[0], "").trim();
     }
 
-    const repeatSteps = [
+    const repeatSteps: WorkoutStep[] = [
       {
         type: "ExecutableStepDTO",
         stepOrder: stepOrder + 1,

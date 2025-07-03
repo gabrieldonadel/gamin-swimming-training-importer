@@ -1,4 +1,4 @@
-import { TrainingData } from "./types";
+import { parseTrainingText } from "./parser";
 
 const baseTrainingData = {
   ownerId: 90209832,
@@ -43,8 +43,6 @@ const baseTrainingData = {
   shared: false,
   isWheelchair: false,
 };
-
-declare function parseTrainingText(text: string): TrainingData;
 
 document.addEventListener("DOMContentLoaded", () => {
   const importTrainingButton = document.getElementById(
@@ -97,6 +95,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         "Training edited successfully:",
                         response.data
                       );
+                      setTimeout(() => {
+                        if (tab.id) {
+                          chrome.tabs.reload(tab.id);
+                          window.close();
+                        }
+                      }, 1000);
                     } else {
                       status.textContent = "Error importing training.";
                       console.error("Error editing training:", response.error);

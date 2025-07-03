@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Imports Swimming training data to Garmin Connect.",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "watch": "tsc --watch"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.243",

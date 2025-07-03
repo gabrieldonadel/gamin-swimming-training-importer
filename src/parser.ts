@@ -1,4 +1,4 @@
-import { TrainingData, WorkoutStep } from "./types";
+import type { TrainingData, WorkoutStep } from "./types";
 
 const loopStepBase = {
   type: "RepeatGroupDTO",
@@ -40,7 +40,7 @@ const restStepType = {
   displayOrder: 5,
 };
 
-function parseTrainingText(text: string): TrainingData {
+export function parseTrainingText(text: string): TrainingData {
   const lines = text.split("\n").filter((line) => line.trim() !== "");
   const workoutSteps: WorkoutStep[] = [];
   let stepOrder = 1;

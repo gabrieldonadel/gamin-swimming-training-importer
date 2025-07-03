@@ -2,10 +2,22 @@
 <html>
 
 <head>
-  <title>Garmin Training Importer</title>
+  <title>Swim2Garmin</title>
   <script src="dist/parser.js"></script>
   <script src="dist/popup.js"></script>
   <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1em;
+      background-color: #f9f9f9;
+    }
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+
     .loader {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #3498db;
@@ -14,6 +26,15 @@
       height: 20px;
       animation: spin 2s linear infinite;
       display: none;
+      margin: 1em auto;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3em;
     }
 
     @keyframes spin {
@@ -29,7 +50,10 @@
 </head>
 
 <body>
-  <h1>Garmin Training Importer</h1>
+  <div class="header">
+    <img src="src/assets/rounded-logo.png" alt="Swim2Garmin Logo">
+    <h1>Swim2Garmin</h1>
+  </div>
   <textarea id="training-text" rows="10" cols="50"></textarea>
   <button id="import-training">Import Training</button>
   <div id="loader" class="loader"></div>

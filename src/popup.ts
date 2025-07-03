@@ -1,3 +1,5 @@
+import { TrainingData } from "./types";
+
 const baseTrainingData = {
   ownerId: 90209832,
   workoutName: "02/07 - import test",
@@ -42,7 +44,7 @@ const baseTrainingData = {
   isWheelchair: false,
 };
 
-declare function parseTrainingText(text: string): any;
+declare function parseTrainingText(text: string): TrainingData;
 
 document.addEventListener("DOMContentLoaded", () => {
   const importTrainingButton = document.getElementById(

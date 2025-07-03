@@ -1,3 +1,5 @@
+import { TrainingData, WorkoutStep } from "./types";
+
 const loopStepBase = {
   type: "RepeatGroupDTO",
   stepType: {
@@ -14,9 +16,9 @@ const loopStepBase = {
 };
 
 const swimmingSportType = {
-  sportTypeId: 3,
-  sportTypeKey: "other",
-  displayOrder: 11,
+  sportTypeId: 4,
+  sportTypeKey: "swimming",
+  displayOrder: 3,
 };
 
 const freeStrokeType = {
@@ -25,28 +27,18 @@ const freeStrokeType = {
   displayOrder: 6,
 };
 
-interface WorkoutStep {
-  type: string;
-  stepOrder: number;
-  description?: string;
-  stepType?: { [key: string]: any };
-  endCondition: { [key: string]: any };
-  endConditionValue?: number;
-  strokeType?: { [key: string]: any };
-  numberOfIterations?: number;
-  workoutSteps?: WorkoutStep[];
-}
+const restEndCondition = {
+  conditionTypeId: 8,
+  conditionTypeKey: "fixed.rest",
+  displayOrder: 8,
+  displayable: true,
+};
 
-interface WorkoutSegment {
-  segmentOrder: number;
-  sportType: { [key: string]: any };
-  workoutSteps: WorkoutStep[];
-}
-
-interface TrainingData {
-  sportType: { [key: string]: any };
-  workoutSegments: WorkoutSegment[];
-}
+const restStepType = {
+  stepTypeId: 5,
+  stepTypeKey: "rest",
+  displayOrder: 5,
+};
 
 function parseTrainingText(text: string): TrainingData {
   const lines = text.split("\n").filter((line) => line.trim() !== "");
@@ -109,17 +101,8 @@ function parseTrainingText(text: string): TrainingData {
       repeatSteps.push({
         type: "ExecutableStepDTO",
         stepOrder: stepOrder + 2,
-        stepType: {
-          stepTypeId: 5,
-          stepTypeKey: "rest",
-          displayOrder: 5,
-        },
-        endCondition: {
-          conditionTypeId: 8,
-          conditionTypeKey: "fixed.rest",
-          displayOrder: 8,
-          displayable: true,
-        },
+        stepType: restStepType,
+        endCondition: restEndCondition,
         endConditionValue: rest,
       });
     }
@@ -135,7 +118,7 @@ function parseTrainingText(text: string): TrainingData {
   }
 
   return {
-    sportType: { sportTypeId: 4, sportTypeKey: "swimming" },
+    sportType: swimmingSportType,
     workoutSegments: [
       {
         segmentOrder: 1,

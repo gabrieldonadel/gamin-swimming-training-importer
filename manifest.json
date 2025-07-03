@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Garmin Training Importer",
+  "name": "Swim2Garmin",
   "version": "1.0",
   "description": "Imports training data to Garmin Connect.",
   "permissions": [
@@ -23,5 +23,8 @@
   ],
   "action": {
     "default_popup": "popup.html"
+  },
+  "icons": {
+    "128": "src/assets/rounded-logo.png"
   }
 }

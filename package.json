@@ -1,7 +1,7 @@
 {
-  "name": "garmin-training-importer",
+  "name": "swim2garmin",
   "version": "1.0.0",
-  "description": "Imports training data to Garmin Connect.",
+  "description": "Imports Swimming training data to Garmin Connect.",
   "scripts": {
     "build": "tsc"
   },

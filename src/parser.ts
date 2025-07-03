@@ -1,3 +1,4 @@
+import { SportType, SportTypes } from "./constants";
 import type { TrainingData, WorkoutStep } from "./types";
 
 const loopStepBase = {
@@ -13,12 +14,6 @@ const loopStepBase = {
     displayOrder: 7,
     displayable: false,
   },
-};
-
-const swimmingSportType = {
-  sportTypeId: 4,
-  sportTypeKey: "swimming",
-  displayOrder: 3,
 };
 
 const freeStrokeType = {
@@ -118,11 +113,11 @@ export function parseTrainingText(text: string): TrainingData {
   }
 
   return {
-    sportType: swimmingSportType,
+    sportType: SportTypes[SportType.SWIMMING],
     workoutSegments: [
       {
         segmentOrder: 1,
-        sportType: swimmingSportType,
+        sportType: SportTypes[SportType.SWIMMING],
         workoutSteps: workoutSteps,
       },
     ],

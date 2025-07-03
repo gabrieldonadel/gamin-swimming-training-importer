@@ -1,4 +1,4 @@
-import { parseTrainingText } from "./parser";
+import { parseTrainingText } from "../../parser";
 
 const baseTrainingData = {
   ownerId: 90209832,

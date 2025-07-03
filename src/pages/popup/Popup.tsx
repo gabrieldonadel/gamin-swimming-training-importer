@@ -1,143 +1,169 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import myLogo from "@assets/rounded-logo.png";
 import { parseTrainingText } from "@src/parser";
 import { baseTrainingData } from "@src/constants";
 
 export default function Popup() {
-  const [token, setToken] = React.useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [status, setStatus] = useState({ message: "", type: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Fetch the token from the content script when the popup is opened
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tab = tabs[0];
-      chrome.tabs.sendMessage(
-        tab.id as number,
-        { action: "getToken" },
-        (response: { token: string | null }) => {
-          if (response && response.token) {
+      if (tab.id) {
+        chrome.tabs.sendMessage(tab.id, { action: "getToken" }, (response) => {
+          if (chrome.runtime.lastError) {
+            setStatus({
+              message:
+                "Could not connect to the page. Please refresh the Garmin Connect page and try again.",
+              type: "error",
+            });
+            console.error(chrome.runtime.lastError.message);
+          } else if (response && response.token) {
             setToken(response.token);
           } else {
-            console.error("Could not get token from Garmin Connect.");
+            setStatus({
+              message:
+                "Could not get token from Garmin Connect. Please refresh the page.",
+              type: "error",
+            });
           }
-        }
-      );
+        });
+      }
     });
   }, []);
 
-  useEffect(() => {
-    const main = () => {
-      const importTrainingButton = document.getElementById(
-        "import-training"
-      ) as HTMLButtonElement;
-      const trainingTextArea = document.getElementById(
-        "training-text"
-      ) as HTMLTextAreaElement;
-      const loader = document.getElementById("loader") as HTMLDivElement;
-      const status = document.getElementById("status") as HTMLDivElement;
-
-      importTrainingButton.addEventListener("click", () => {
-        loader.style.display = "block";
-        status.textContent = "";
-
-        const trainingText = trainingTextArea.value;
-
-        try {
-          const trainingData = parseTrainingText(trainingText);
-
-          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            const tab = tabs[0];
-            const match = tab.url?.match(/workout\/(\d+)/);
-            const trainingId = match ? match[1] : null;
-
-            if (trainingId) {
-              chrome.tabs.sendMessage(
-                tab.id as number,
-                { action: "getToken" },
-                (response: { token: string | null }) => {
-                  if (response && response.token) {
-                    chrome.runtime.sendMessage(
-                      {
-                        action: "editTraining",
-                        data: {
-                          token: response.token,
-                          trainingId: trainingId,
-                          trainingData: {
-                            ...baseTrainingData,
-                            workoutId: Number(trainingId),
-                            ...trainingData,
-                          },
-                        },
-                      },
-                      (response: {
-                        success: boolean;
-                        data?: any;
-                        error?: any;
-                      }) => {
-                        loader.style.display = "none";
-                        if (response.success) {
-                          status.textContent =
-                            "Training imported successfully!";
-                          console.log(
-                            "Training edited successfully:",
-                            response.data
-                          );
-                          setTimeout(() => {
-                            if (tab.id) {
-                              chrome.tabs.reload(tab.id);
-                              window.close();
-                            }
-                          }, 1000);
-                        } else {
-                          status.textContent = "Error importing training.";
-                          console.error(
-                            "Error editing training:",
-                            response.error
-                          );
-                        }
-                      }
-                    );
-                  } else {
-                    loader.style.display = "none";
-                    status.textContent =
-                      "Could not get token from Garmin Connect.";
-                    console.error("Could not get token from Garmin Connect.");
-                  }
-                }
-              );
-            } else {
-              loader.style.display = "none";
-              status.textContent =
-                "Could not extract training ID from the URL. Are you on a workout page?";
-              console.error(
-                "Could not extract training ID from the URL. Are you on a workout page?"
-              );
-            }
-          });
-        } catch (error) {
-          loader.style.display = "none";
-          status.textContent =
-            "Something went wrong while parsing the training data.";
-          console.log("error", error);
-        }
+  const importTraining = () => {
+    if (!token) {
+      setStatus({
+        message:
+          "Authentication token not found. Please ensure you are on a Garmin Connect workout page and refresh.",
+        type: "error",
       });
-    };
+      return;
+    }
 
-    main();
-  }, []);
+    const trainingText = textAreaRef.current?.value.trim();
+    if (!trainingText) {
+      setStatus({ message: "Please paste your training text.", type: "error" });
+      return;
+    }
+
+    setIsLoading(true);
+    setStatus({ message: "", type: "" });
+
+    try {
+      const trainingData = parseTrainingText(trainingText);
+
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const tab = tabs[0];
+        const match = tab.url?.match(/workout\/(\d+)/);
+        const trainingId = match ? match[1] : null;
+
+        if (!trainingId) {
+          setIsLoading(false);
+          setStatus({
+            message:
+              "Not on a Garmin workout page. Please navigate to a workout to import.",
+            type: "error",
+          });
+          return;
+        }
+
+        chrome.runtime.sendMessage(
+          {
+            action: "editTraining",
+            data: {
+              token,
+              trainingId,
+              trainingData: {
+                ...baseTrainingData,
+                workoutId: Number(trainingId),
+                ...trainingData,
+              },
+            },
+          },
+          (response) => {
+            setIsLoading(false);
+            if (response.success) {
+              setStatus({
+                message: "Success! Reloading page...",
+                type: "success",
+              });
+              setTimeout(() => {
+                if (tab.id) {
+                  chrome.tabs.reload(tab.id);
+                  window.close();
+                }
+              }, 1500);
+            } else {
+              setStatus({
+                message: `Import failed: ${response.error || "Unknown error"}`,
+                type: "error",
+              });
+              console.error("Error editing training:", response.error);
+            }
+          }
+        );
+      });
+    } catch (error) {
+      setIsLoading(false);
+      setStatus({
+        message: `Error parsing training data: ${(error as any).message}`,
+        type: "error",
+      });
+      console.error("Parsing error:", error);
+    }
+  };
+
+  const statusClasses = `w-full text-sm text-center mt-4 p-2 rounded-md ${
+    status.type === "success" ? "bg-green-100 text-green-800" : ""
+  } ${status.type === "error" ? "bg-red-100 text-red-800" : ""}`;
 
   return (
-    <div className="absolute top-0 left-0 right-0 bottom-0 text-center h-full p-3 flex flex-col">
-      <div className="header">
-        <img src={myLogo} alt="Swim2Garmin Logo" />
-        <h1>Swim2Garmin</h1>
+    <div className="bg-white font-sans p-6 flex flex-col items-center">
+      {/* Header */}
+      <div className="flex items-center w-full mb-5">
+        <img src={myLogo} alt="Swim2Garmin Logo" className="h-12 w-12 mr-4" />
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-medium text-gray-800 -mt-1">
+            Swim2Garmin
+          </h1>
+        </div>
       </div>
-      <textarea id="training-text" rows={10} cols={50}></textarea>
-      <button id="import-training">Import Training</button>
-      <div id="loader" className="loader">
-        {" "}
-      </div>
-      <div id="status"></div>
-      {token}
+
+      {/* Text Area */}
+      <textarea
+        ref={textAreaRef}
+        placeholder="Paste your swim training text here..."
+        disabled={isLoading}
+        className="w-full h-[150px] p-3 mb-4 text-sm border border-gray-300 rounded-lg resize-none
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   disabled:bg-gray-100"
+      />
+
+      {/* Import Button */}
+      <button
+        type="button"
+        onClick={importTraining}
+        disabled={isLoading || !token}
+        className="w-full h-12 px-6 text-white font-medium bg-blue-600 rounded-lg
+                   hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                   disabled:bg-blue-300 disabled:cursor-not-allowed
+                   flex items-center justify-center transition-colors duration-200"
+      >
+        {isLoading ? (
+          <div className="w-6 h-6 border-4 border-white border-t-transparent border-solid rounded-full animate-spin"></div>
+        ) : (
+          "Import Training"
+        )}
+      </button>
+
+      {status.message && <div className={statusClasses}>{status.message}</div>}
     </div>
   );
 }

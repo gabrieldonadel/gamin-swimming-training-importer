@@ -15,7 +15,7 @@ export const SportTypes: Record<
 
 export const baseTrainingData = {
   ownerId: 90209832,
-  workoutName: "02/07 - import test",
+  workoutName: "Swim2Garmin",
   description: null,
   updatedDate: "2025-07-01T09:06:26.0",
   createdDate: "2025-06-13T19:55:28.0",

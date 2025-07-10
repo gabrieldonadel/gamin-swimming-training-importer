@@ -110,6 +110,22 @@ export function parseTrainingText(text: string): TrainingData {
     });
 
     stepOrder += repeatSteps.length + 1;
+
+    // add lap button press
+    workoutSteps.push({
+      stepOrder,
+      stepType: restStepType,
+      type: "ExecutableStepDTO",
+      endCondition: {
+        conditionTypeId: 1,
+        conditionTypeKey: "lap.button",
+        displayOrder: 1,
+        displayable: true,
+      },
+      endConditionValue: 200,
+    });
+
+    stepOrder += 1;
   }
 
   return {

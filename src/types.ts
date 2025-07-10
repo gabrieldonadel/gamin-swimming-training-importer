@@ -2,8 +2,19 @@ export interface WorkoutStep {
   type: string;
   stepOrder: number;
   description?: string;
-  stepType?: { [key: string]: any };
-  endCondition: { [key: string]: any };
+  stepType?: {
+    stepTypeId: number;
+    stepTypeKey: string;
+    displayOrder: number;
+    [key: string]: any;
+  };
+  endCondition: {
+    conditionTypeId: number;
+    conditionTypeKey: string;
+    displayOrder: number;
+    displayable: boolean;
+    [key: string]: any;
+  };
   endConditionValue?: number;
   strokeType?: { [key: string]: any };
   numberOfIterations?: number;
@@ -20,3 +31,10 @@ export interface TrainingData {
   sportType: { [key: string]: any };
   workoutSegments: WorkoutSegment[];
 }
+
+export type EndCondition = {
+  conditionTypeId: number;
+  conditionTypeKey: string;
+  displayOrder: number;
+  displayable: boolean;
+};

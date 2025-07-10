@@ -3,37 +3,48 @@ import React, { useEffect, useState, useRef } from "react";
 import myLogo from "@assets/rounded-logo.png";
 import { parseTrainingText } from "@src/parser";
 import { baseTrainingData } from "@src/constants";
+import { TrainingVisualizer } from "@src/components/TrainingVisualizer";
 
 export default function Popup() {
   const [token, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState({ message: "", type: "" });
   const [isLoading, setIsLoading] = useState(false);
+  const [showVisualizer, setShowVisualizer] = useState(false);
+  const [trainingText, setTrainingText] = useState("");
+
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch the token from the content script when the popup is opened
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tab = tabs[0];
-      if (tab.id) {
-        chrome.tabs.sendMessage(tab.id, { action: "getToken" }, (response) => {
-          if (chrome.runtime.lastError) {
-            setStatus({
-              message:
-                "Could not connect to the page. Please refresh the Garmin Connect page and try again.",
-              type: "error",
-            });
-            console.error(chrome.runtime.lastError.message);
-          } else if (response && response.token) {
-            setToken(response.token);
-          } else {
-            setStatus({
-              message:
-                "Could not get token from Garmin Connect. Please refresh the page.",
-              type: "error",
-            });
-          }
-        });
+      if (!tab.id || !tab.url) {
+        return;
       }
+
+      const tabURL = new URL(tab.url);
+      if (tabURL.host !== "connect.garmin.com") {
+        return;
+      }
+
+      chrome.tabs.sendMessage(tab.id, { action: "getToken" }, (response) => {
+        if (chrome.runtime.lastError) {
+          setStatus({
+            message:
+              "Could not connect to the page. Please refresh the Garmin Connect page and try again.",
+            type: "error",
+          });
+          console.error(chrome.runtime.lastError.message);
+        } else if (response && response.token) {
+          setToken(response.token);
+        } else {
+          setStatus({
+            message:
+              "Could not get token from Garmin Connect. Please refresh the page.",
+            type: "error",
+          });
+        }
+      });
     });
   }, []);
 
@@ -49,7 +60,10 @@ export default function Popup() {
 
     const trainingText = textAreaRef.current?.value.trim();
     if (!trainingText) {
-      setStatus({ message: "Please paste your training text.", type: "error" });
+      setStatus({
+        message: "Please paste your training text.",
+        type: "error",
+      });
       return;
     }
 
@@ -57,7 +71,7 @@ export default function Popup() {
     setStatus({ message: "", type: "" });
 
     try {
-      const trainingData = parseTrainingText(trainingText);
+      const parsedTrainingData = parseTrainingText(trainingText);
 
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const tab = tabs[0];
@@ -74,17 +88,19 @@ export default function Popup() {
           return;
         }
 
+        const trainingData = {
+          ...baseTrainingData,
+          workoutId: Number(trainingId),
+          ...parsedTrainingData,
+        };
+
         chrome.runtime.sendMessage(
           {
             action: "editTraining",
             data: {
               token,
               trainingId,
-              trainingData: {
-                ...baseTrainingData,
-                workoutId: Number(trainingId),
-                ...trainingData,
-              },
+              trainingData,
             },
           },
           (response) => {
@@ -128,10 +144,14 @@ export default function Popup() {
     <div className="bg-white font-sans p-6 flex flex-col items-center">
       {/* Header */}
       <div className="flex items-center w-full mb-5">
-        <img src={myLogo} alt="Swim2Garmin Logo" className="h-12 w-12 mr-4" />
+        <img
+          src={myLogo}
+          alt="Swim2Garmin Logo"
+          className="h-12 w-12 mr-4 border-2 border-teal-600 rounded-full"
+        />
         <div className="flex flex-col">
-          <h1 className="text-2xl font-medium text-gray-800 -mt-1">
-            Swim2Garmin
+          <h1 className="text-3xl font-medium -mt-1 title">
+            Swim<span className="garmin-green">2</span>Garmin
           </h1>
         </div>
       </div>
@@ -141,29 +161,43 @@ export default function Popup() {
         ref={textAreaRef}
         placeholder="Paste your swim training text here..."
         disabled={isLoading}
-        className="w-full h-[150px] p-3 mb-4 text-sm border border-gray-300 rounded-lg resize-none
+        className="w-full h-[280px] p-3 mb-4 text-sm border border-gray-300 rounded-lg resize-none
                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                    disabled:bg-gray-100"
+        onChange={(e) => setTrainingText(e.target.value)}
       />
 
-      {/* Import Button */}
-      <button
-        type="button"
-        onClick={importTraining}
-        disabled={isLoading || !token}
-        className="w-full h-12 px-6 text-white font-medium bg-blue-600 rounded-lg
-                   hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                   disabled:bg-blue-300 disabled:cursor-not-allowed
-                   flex items-center justify-center transition-colors duration-200"
-      >
-        {isLoading ? (
-          <div className="w-6 h-6 border-4 border-white border-t-transparent border-solid rounded-full animate-spin"></div>
-        ) : (
-          "Import Training"
-        )}
-      </button>
+      {/* Action Buttons */}
+      <div className="w-full flex gap-2">
+        <button
+          type="button"
+          onClick={importTraining}
+          disabled={isLoading || !token}
+          className="w-full h-12 px-6 text-white font-medium bg-teal-500 rounded-lg
+                     hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500
+                     disabled:cursor-not-allowed
+                     flex items-center justify-center transition-colors duration-200 font-semibold"
+        >
+          {isLoading ? (
+            <div className="w-6 h-6 border-4 border-white border-t-transparent border-solid rounded-full animate-spin"></div>
+          ) : (
+            "Import Training"
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowVisualizer(!showVisualizer)}
+          className="h-12 px-4 text-gray-700 bg-gray-200 rounded-lg
+                     hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400
+                     transition-colors duration-200 font-semibold"
+        >
+          {showVisualizer ? "Hide" : "Preview"}
+        </button>
+      </div>
 
       {status.message && <div className={statusClasses}>{status.message}</div>}
+      {/* Visualizer */}
+      {showVisualizer && <TrainingVisualizer trainingText={trainingText} />}
     </div>
   );
 }

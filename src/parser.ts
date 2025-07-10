@@ -1,5 +1,5 @@
 import { SportType, SportTypes } from "./constants";
-import type { TrainingData, WorkoutStep } from "./types";
+import type { EndCondition, TrainingData, WorkoutStep } from "./types";
 
 const loopStepBase = {
   type: "RepeatGroupDTO",
@@ -22,14 +22,21 @@ const freeStrokeType = {
   displayOrder: 6,
 };
 
-const restEndCondition = {
+const restEndCondition: EndCondition = {
   conditionTypeId: 8,
   conditionTypeKey: "fixed.rest",
   displayOrder: 8,
   displayable: true,
 };
 
-const restStepType = {
+export const lapEndCondition: EndCondition = {
+  conditionTypeId: 1,
+  conditionTypeKey: "lap.button",
+  displayOrder: 1,
+  displayable: true,
+};
+
+export const restStepType = {
   stepTypeId: 5,
   stepTypeKey: "rest",
   displayOrder: 5,
@@ -84,6 +91,7 @@ export function parseTrainingText(text: string): TrainingData {
         },
         endCondition: {
           conditionTypeKey: "distance",
+          displayOrder: 3,
           conditionTypeId: 3,
           displayable: true,
         },
@@ -116,12 +124,7 @@ export function parseTrainingText(text: string): TrainingData {
       stepOrder,
       stepType: restStepType,
       type: "ExecutableStepDTO",
-      endCondition: {
-        conditionTypeId: 1,
-        conditionTypeKey: "lap.button",
-        displayOrder: 1,
-        displayable: true,
-      },
+      endCondition: lapEndCondition,
       endConditionValue: 200,
     });
 

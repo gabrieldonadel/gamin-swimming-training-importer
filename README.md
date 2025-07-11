@@ -1,6 +1,6 @@
-# Swim2Garmin: Importe Seus Treinos de Natação para o Garmin Connect
+# Swim2Garmin
 
-[![Versão para Chrome](https://img.shields.io/badge/Disponível%20para-Chrome-green.svg?logo=google-chrome)](https://chrome.google.com/webstore/detail/swim2garmin/your-extension-id)
+[![Versão para Chrome](https://img.shields.io/badge/Disponível%20para-Chrome-green.svg?logo=google-chrome)](https://chromewebstore.google.com/detail/swim2garmin/oomnbdnhjjpjngonaneamhkmlpnjlcnk)
 [![Versão para Firefox](https://img.shields.io/badge/Disponível%20para-Firefox-orange.svg?logo=firefox-browser)](https://addons.mozilla.org/en-US/firefox/addon/swim2garmin/)
 [![Licença: MIT](https://img.shields.io/badge/Licença-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -20,7 +20,7 @@ O **Swim2Garmin** é uma extensão para navegador que facilita nadadores importa
 
 ### Google Chrome
 
-1.  Acesse a [Chrome Web Store](https://chrome.google.com/webstore/detail/swim2garmin/your-extension-id).
+1.  Acesse a [Chrome Web Store](https://chromewebstore.google.com/detail/swim2garmin/oomnbdnhjjpjngonaneamhkmlpnjlcnk).
 2.  Clique em "Adicionar ao Chrome".
 3.  Acesse o [Garmin Connect](https://connect.garmin.com/) e importe o seu treino!
 

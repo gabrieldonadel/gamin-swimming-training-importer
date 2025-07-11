@@ -15,6 +15,13 @@ export default mergeConfig(
           background: {
             scripts: ["src/background.ts"],
           },
+          // @ts-ignore
+          browser_specific_settings: {
+            gecko: {
+              id: "swim2garmin@gabrieldonadel.dev",
+              strict_min_version: "58.0",
+            },
+          },
         } as ManifestV3Export,
         browser: "firefox",
         contentScripts: {

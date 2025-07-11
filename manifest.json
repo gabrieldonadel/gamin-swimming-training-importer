@@ -3,7 +3,7 @@
   "name": "Swim2Garmin",
   "version": "1.0",
   "description": "Imports training data to Garmin Connect.",
-  "permissions": ["storage", "activeTab", "scripting", "webRequest"],
+  "permissions": ["activeTab"],
   "host_permissions": ["https://connect.garmin.com/"],
   "background": {
     "service_worker": "src/background.ts"

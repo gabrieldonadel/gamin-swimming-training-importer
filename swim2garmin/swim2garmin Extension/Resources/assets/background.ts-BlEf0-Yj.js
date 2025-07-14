@@ -1,0 +1,2 @@
+chrome.runtime.onMessage.addListener((n,r,e)=>{if(n.action==="editTraining"){const{token:a,trainingId:i,trainingData:c}=n.data;return fetch(`https://connect.garmin.com/workout-service/workout/${i}`,{headers:{accept:"application/json, text/plain, */*",authorization:`Bearer ${a}`,"content-type":"application/json;charset=UTF-8","di-backend":"connectapi.garmin.com"},body:JSON.stringify(c),method:"PUT"}).then(t=>t.status===204?null:t.json()).then(t=>{e({success:!0,data:t})}).catch(t=>{e({success:!1,error:t})}),!0}});
+//# sourceMappingURL=background.ts-BlEf0-Yj.js.map

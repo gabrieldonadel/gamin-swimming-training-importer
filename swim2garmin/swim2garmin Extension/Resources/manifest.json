@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Swim2Garmin",
+  "version": "1.0.0",
+  "description": "Imports training data to Garmin Connect.",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://connect.garmin.com/"
+  ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/content.ts-DIpovTZP.js"
+      ],
+      "matches": [
+        "https://connect.garmin.com/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "src/pages/popup/index.html",
+    "default_icon": {
+      "32": "icon-32.png"
+    }
+  },
+  "icons": {
+    "128": "icon-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [],
+      "resources": [
+        "icon-128.png",
+        "icon-32.png"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "https://connect.garmin.com/*"
+      ],
+      "resources": [
+        "assets/content.ts-DIpovTZP.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
+}
